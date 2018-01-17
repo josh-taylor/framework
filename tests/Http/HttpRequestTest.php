@@ -305,6 +305,27 @@ class HttpRequestTest extends TestCase
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\File\UploadedFile', $request['file']);
     }
 
+    public function testInputFileArrayOrder()
+    {
+        $request = Request::create('/', 'GET', [
+            'images' => [
+                2 => 'file3.php',
+            ]
+        ], [], [
+            'images' => [
+                0 => new \Symfony\Component\HttpFoundation\File\UploadedFile(__FILE__, 'file1.php'),
+                1 => new \Symfony\Component\HttpFoundation\File\UploadedFile(__FILE__, 'file2.php'),
+                3 => new \Symfony\Component\HttpFoundation\File\UploadedFile(__FILE__, 'file3.php'),
+            ]
+        ]);
+
+        $values = array_values($request['images']);
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\File\UploadedFile', $values[0]);
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\File\UploadedFile', $values[1]);
+        $this->assertEquals('file3.php', $values[2]);
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\File\UploadedFile', $values[3]);
+    }
+
     public function testAllMethod()
     {
         $request = Request::create('/', 'GET', ['name' => 'Taylor', 'age' => null]);
